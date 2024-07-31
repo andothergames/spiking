@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 
 function App() {
   const [userInfo, setUserInfo] = useState<any>(null);
-  const [accessToken, setAccessToken] = useState<any>(null);
+  const [accessToken, setAccessToken] = useState<string | any>(null);
+  const [securedData, setSecuredData] = useState<string | any>(null);
 
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
         console.log("token response:", tokenResponse);
-        setAccessToken(tokenResponse.access_token);
-
+        
         const userInfoResponse = await fetch(
           "https://www.googleapis.com/oauth2/v3/userinfo",
           {
@@ -22,6 +22,7 @@ function App() {
         );
         const userInfo = await userInfoResponse.json();
         setUserInfo(userInfo);
+        setAccessToken(tokenResponse.access_token);
       } catch (error) {
         console.log("failed", error);
       }
@@ -49,6 +50,49 @@ function App() {
     setUserInfo(null);
   };
 
+  const fetchSecuredData = async () => {
+    if (accessToken) {
+      try {
+        const response = await fetch("http://localhost:8080/secured", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.text();
+          setSecuredData(data)
+          console.log(data);
+          
+        } else {
+          console.log('failed to get secured data');
+        } 
+      } catch (err) {
+          console.log('error in getting sec data', err);
+          
+        }
+    }
+  };
+
+  const fetchRegularData = async () => {
+
+      try {
+        const response = await fetch("http://localhost:8080");
+        if (response.ok) {
+          const data = await response.text();
+          setSecuredData(data)
+          console.log(data);
+          console.log(securedData);
+          
+          
+        } else {
+          console.log('failed to get secured data');
+        } 
+      } catch (err) {
+          console.log('error in getting sec data', err);
+          
+        }
+  };
+
   useEffect(() => {
     if (userInfo) {
       console.log("User Info:", userInfo);
@@ -61,6 +105,8 @@ function App() {
       <h1>Google OAuth</h1>
       <button onClick={() => login()}>Sign in with Google</button>
       <button onClick={() => logout()}>Sign out with Google</button>
+      <p><button onClick={fetchSecuredData}>Get Secured Data</button></p>
+      <p><button onClick={fetchRegularData}>Get Regular Data</button></p>
       {userInfo && (
         <div>
           <p>

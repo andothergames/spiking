@@ -13,6 +13,7 @@ public class HomeController {
     }
     @GetMapping("/secured")
     public String secured(@AuthenticationPrincipal OAuth2User user){
-        return user.toString();
+        System.out.println("in java home controller");
+       return user.toString();
     }
 }
