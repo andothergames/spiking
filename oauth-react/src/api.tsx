@@ -7,7 +7,7 @@ const api = axios.create({
 export async function getAuth(): Promise<any>{
         try {
             const { data } = await api.get<any>('/');
-            return data;
+            return data.toString();
         } catch (err) {
             console.log(err);
             throw err;
